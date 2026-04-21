@@ -10,8 +10,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
-        .stat-card { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -21,166 +20,123 @@
                 <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Depot Kimia War Room</h1>
                 <p class="text-slate-500 font-medium">Monitoring Penjualan & Efisiensi Campaign 2026</p>
             </div>
-            <div id="status" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-pulse">
-                Menghubungkan ke Database...
+            <div id="status" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                Sinkronisasi Data...
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
             <div class="stat-card border-b-4 border-blue-500">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Omset (GMV)</p>
-                <h2 id="val-gmv" class="text-2xl font-extrabold text-slate-800">Rp 0</h2>
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Total Omset (GMV)</p>
+                <h2 id="val-gmv" class="text-2xl font-extrabold text-slate-800 text-blue-600">Rp 0</h2>
             </div>
             <div class="stat-card border-b-4 border-emerald-500">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pcs Terjual</p>
-                <h2 id="val-qty" class="text-2xl font-extrabold text-emerald-600">0</h2>
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Pcs Terjual</p>
+                <h2 id="val-qty" class="text-2xl font-extrabold text-emerald-600">0 Pcs</h2>
             </div>
             <div class="stat-card border-b-4 border-amber-500">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Real ROAS</p>
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Real ROAS</p>
                 <h2 id="val-roas" class="text-2xl font-extrabold text-amber-600">0x</h2>
             </div>
             <div class="stat-card border-b-4 border-rose-500">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Net Profit Est.</p>
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Est. Net Profit</p>
                 <h2 id="val-profit" class="text-2xl font-extrabold text-rose-600">Rp 0</h2>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="stat-card lg:col-span-2">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-slate-800">Tren Penjualan Harian</h3>
-                    <span class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">Live dari Google Sheets</span>
-                </div>
-                <div class="h-64">
-                    <canvas id="mainChart"></canvas>
-                </div>
+                <h3 class="font-bold text-slate-800 mb-6">Tren Penjualan Harian</h3>
+                <div class="h-64"><canvas id="mainChart"></canvas></div>
             </div>
-
             <div class="stat-card">
-                <h3 class="font-bold text-slate-800 mb-6 italic">Winning Products (Pcs)</h3>
-                <div id="sku-list" class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-                    </div>
-            </div>
-        </div>
-
-        <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl">
-                <h4 class="font-bold text-amber-400 mb-3 flex items-center">
-                    <span class="mr-2">🔥</span> Guerrilla Action Items
-                </h4>
-                <ul id="insights" class="text-sm space-y-3 text-slate-300">
-                    <li>Menganalisa data untuk strategi baru...</li>
-                </ul>
-            </div>
-            <div class="bg-white border-2 border-dashed border-slate-300 p-6 rounded-2xl flex flex-col justify-center items-center text-center">
-                <p class="text-slate-400 text-sm font-medium mb-1">Update Terakhir</p>
-                <p id="update-time" class="text-slate-800 font-bold text-lg">-</p>
+                <h3 class="font-bold text-slate-800 mb-6 italic">Top SKU (Pcs)</h3>
+                <div id="sku-list" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // SNIPER URL: Langsung ke ID Sheet April kamu
-        const SHEET_ID = '1EOzioryLYkKg1M8oTCx9y9GmDlwAbQw0DJLUt16ksqE';
-        const GID = '1189501623';
-        const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
+        // PAKAI LINK PUBLISH TO WEB (CSV) AGAR LEBIH STABIL
+        const URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJh5boOGgRsRa0uFt9UR_G_9P0t6QWbZekNmMKoGJLWHl56o74ZZ67NsoLf8rgUOHWhoPUyylmHsoJ/pub?gid=1189501623&single=true&output=csv';
 
         function formatIDR(val) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
         }
 
-        function cleanNum(val) {
+        // PEMBERSIH ANGKA FORMAT INDONESIA
+        function parseIndoNum(val) {
             if (!val) return 0;
-            return parseFloat(String(val).replace(/[^0-9.-]+/g, "")) || 0;
+            let str = String(val).trim();
+            // Jika ada titik ribuan (misal 1.500.000), hapus titiknya
+            if ((str.match(/\./g) || []).length > 1 || (str.includes('.') && str.includes(','))) {
+                str = str.replace(/\./g, '').replace(',', '.');
+            } else if (str.includes('.') && str.length > 3) {
+                 // Kasus 3.655 (biasanya titik ribuan)
+                 str = str.replace(/\./g, '');
+            }
+            return parseFloat(str.replace(/[^0-9.-]+/g, "")) || 0;
         }
 
-        // Mencari kolom secara pintar (Fuzzy Search)
         function getCol(row, keywords) {
-            const keys = Object.keys(row);
-            for (let key of keys) {
-                const normalizedKey = key.toLowerCase().replace(/[^a-z]/g, '');
-                if (keywords.some(k => normalizedKey.includes(k))) return row[key];
+            for (let key in row) {
+                let k = key.toLowerCase().replace(/[^a-z]/g, '');
+                if (keywords.some(kw => k.includes(kw))) return row[key];
             }
             return null;
         }
 
-        async function init() {
-            Papa.parse(URL, {
-                download: true,
-                header: true,
-                complete: (results) => {
-                    const data = results.data;
-                    let totalGmv = 0, totalQty = 0, totalAds = 0, totalDana = 0, totalHpp = 0;
-                    let skus = {}, daily = {};
+        Papa.parse(URL, {
+            download: true,
+            header: true,
+            complete: (results) => {
+                let totalGmv = 0, totalQty = 0, totalAds = 0, totalDana = 0, totalHpp = 0;
+                let skus = {}, daily = {};
 
-                    data.forEach(row => {
-                        const gmv = cleanNum(getCol(row, ['gmv', 'omset', 'kotor']));
-                        const qty = cleanNum(getCol(row, ['qty', 'pcs', 'jumlah']));
-                        const ads = cleanNum(getCol(row, ['ads', 'iklan']));
-                        const dana = cleanNum(getCol(row, ['totaldanapenjual', 'pencairan', 'dana']));
-                        const hpp = cleanNum(getCol(row, ['hpp', 'modal']));
-                        const tgl = getCol(row, ['tanggal', 'tgl', 'date']);
-                        const name = getCol(row, ['produk', 'nama', 'barang']);
+                results.data.forEach(row => {
+                    const gmv = parseIndoNum(getCol(row, ['gmv', 'omset']));
+                    const qty = parseIndoNum(getCol(row, ['qty', 'pcs', 'jumlah']));
+                    const ads = parseIndoNum(getCol(row, ['ads', 'iklan']));
+                    const dana = parseIndoNum(getCol(row, ['totaldanapenjual', 'dana']));
+                    const hpp = parseIndoNum(getCol(row, ['hpptotal', 'modal']));
+                    const tgl = getCol(row, ['tanggal', 'tgl']);
+                    const name = getCol(row, ['produk', 'nama']);
 
-                        if (gmv > 0 || qty > 0) {
-                            totalGmv += gmv;
-                            totalQty += qty;
-                            totalAds += ads;
-                            totalDana += dana;
-                            totalHpp += hpp;
-                            if (name) skus[name] = (skus[name] || 0) + qty;
-                            if (tgl) daily[tgl] = (daily[tgl] || 0) + gmv;
-                        }
-                    });
+                    if (gmv > 0 || qty > 0) {
+                        totalGmv += gmv;
+                        totalQty += qty;
+                        totalAds += ads;
+                        totalDana += dana;
+                        totalHpp += hpp;
+                        if (name) skus[name] = (skus[name] || 0) + qty;
+                        if (tgl) daily[tgl] = (daily[tgl] || 0) + gmv;
+                    }
+                });
 
-                    // Update UI
-                    document.getElementById('val-gmv').innerText = formatIDR(totalGmv);
-                    document.getElementById('val-qty').innerText = totalQty + " Pcs";
-                    document.getElementById('val-roas').innerText = totalAds > 0 ? (totalGmv/totalAds).toFixed(1) + "x" : "0x";
-                    document.getElementById('val-profit').innerText = formatIDR(totalDana - totalHpp - totalAds);
-                    document.getElementById('status').innerText = "Data Live & Sinkron";
-                    document.getElementById('status').className = "bg-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg";
-                    document.getElementById('update-time').innerText = new Date().toLocaleString('id-ID');
+                document.getElementById('val-gmv').innerText = formatIDR(totalGmv);
+                document.getElementById('val-qty').innerText = totalQty + " Pcs";
+                document.getElementById('val-roas').innerText = totalAds > 0 ? (totalGmv/totalAds).toFixed(1) + "x" : "0x";
+                document.getElementById('val-profit').innerText = formatIDR(totalDana - totalHpp - totalAds);
+                document.getElementById('status').innerText = "Data Terhubung!";
+                document.getElementById('status').className = "bg-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg";
 
-                    // Render SKU
-                    const skuContainer = document.getElementById('sku-list');
-                    skuContainer.innerHTML = Object.entries(skus).sort((a,b) => b[1]-a[1]).slice(0,10).map(([n, q]) => `
-                        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            <span class="text-xs font-bold text-slate-700 truncate mr-4">${n}</span>
-                            <span class="text-xs font-black text-blue-600 bg-blue-50 px-2 py-1 rounded">${q}</span>
-                        </div>
-                    `).join('');
+                const skuList = document.getElementById('sku-list');
+                skuList.innerHTML = Object.entries(skus).sort((a,b) => b[1]-a[1]).map(([n, q]) => `
+                    <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-700 truncate mr-2">${n}</span>
+                        <span class="text-[10px] font-black text-blue-600">${q}</span>
+                    </div>`).join('');
 
-                    // Render Chart
-                    const ctx = document.getElementById('mainChart').getContext('2d');
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: Object.keys(daily),
-                            datasets: [{
-                                label: 'Omset',
-                                data: Object.values(daily),
-                                borderColor: '#3b82f6',
-                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                fill: true,
-                                tension: 0.4,
-                                borderWidth: 3
-                            }]
-                        },
-                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
-                    });
-
-                    // Insights
-                    const insightList = document.getElementById('insights');
-                    const items = [];
-                    if (totalGmv/totalAds > 10) items.push("Efisiensi Iklan luar biasa (ROAS > 10x). Pertahankan momentum!");
-                    if (totalQty > 100) items.push("Volume tembus 100 Pcs. Saatnya ajukan diskon bulk ke vendor.");
-                    if (Object.keys(skus).length > 5) items.push("Varian produk sehat. Tidak tergantung pada 1 SKU saja.");
-                    insightList.innerHTML = items.map(i => `<li>✔ ${i}</li>`).join('');
-                }
-            });
-        }
-        init();
+                new Chart(document.getElementById('mainChart'), {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(daily),
+                        datasets: [{ label: 'Omset', data: Object.values(daily), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
+                    },
+                    options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            }
+        });
     </script>
 </body>
 </html>
